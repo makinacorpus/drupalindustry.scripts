@@ -1,0 +1,52 @@
+#!/bin/sh
+
+# Handle arguments
+if [ $# -ne 1 ]; then
+  echo "Usage: `basename $0` ROOTPATH"
+  exit 65
+fi
+
+# Variables
+ROOTPATH=$1
+BINPATH="$ROOTPATH/bin"
+
+# Locate drush
+# Try local drush install
+drush="$BINPATH/drush"
+if [ ! -x $drush ]; then
+    if [ -e $drush ]; then
+        echo "Found local $drush but it is not executable."
+        exit 1
+    else
+        #echo "Cannot autodetect local drush installation in $drush"
+        drush=""
+    fi
+fi
+
+# Try global drush install
+if [ -n $drush ]; then
+    drush=`which drush`
+    if [ -e $drush ]; then
+        #echo "Cannot autodetect global drush installation."
+        drush=""
+    fi
+fi
+
+# Ask the user
+#if [ -n $drush ]; then
+#    drush="$BINPATH/drush"  # Assign dummy value
+#    while [ ! -x $drush ]; do
+#        read -p "Couldn't autodetect drush. Where is drush? (absolute path) " drush
+#    done
+#    if [ -n $drush ]; then
+#       echo "Aborted by user."
+#       exit 1
+#    fi
+#fi
+
+# Return
+if [ -z $drush ]; then
+    exit 1
+else
+    echo $drush
+fi

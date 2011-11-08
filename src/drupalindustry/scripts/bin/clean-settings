@@ -1,0 +1,41 @@
+#!/bin/sh
+
+# Handle arguments
+if [ $# -ne 1 ]
+then
+  echo "Usage: `basename $0` ROOTPATH"
+  exit 65
+fi
+
+ROOTPATH=$1
+BINPATH="$ROOTPATH/bin"
+drush=`$BINPATH/drupalindustry get-drush`
+if [ -z $drush ]; then
+    echo "Error getting drush."
+    exit 1
+fi
+
+# Constants to find what to clean.
+DOMAIN_REGEXP="include_once DRUPAL_ROOT .*/domain/settings.inc';";
+LENGTH_BEFORE=4;
+LENGTH_AFTER=0;
+
+cd "${ROOTPATH}/www";
+
+SETTINGS_FILE=`$drush status --pipe|grep -o -P "(?<=drupal_root=).*"`;
+SETTINGS_FILE=$SETTINGS_FILE/`$drush status --pipe|grep -o -P "(?<=site_path=).*"`;
+SETTINGS_FILE=$SETTINGS_FILE/settings.php;
+
+if [ -f $SETTINGS_FILE ]; then
+
+  NB_LINE=`grep -nP "$DOMAIN_REGEXP" $SETTINGS_FILE | grep -oP "^\d+(?=:)"`;
+
+  if [ $NB_LINE ]; then
+    cp $SETTINGS_FILE settings.php.tmp;
+    head -`expr $NB_LINE - $LENGTH_BEFORE - 1` $SETTINGS_FILE > settings.php.tmp;
+    tail -`expr \`wc -l < $SETTINGS_FILE\` - $NB_LINE - $LENGTH_AFTER` $SETTINGS_FILE >> settings.php.tmp;
+    cat settings.php.tmp > $SETTINGS_FILE;
+    rm settings.php.tmp;
+  fi
+
+fi

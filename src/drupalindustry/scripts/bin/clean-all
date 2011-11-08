@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# Handle arguments
+if [ $# -ne 1 ]
+then
+  echo "Usage: `basename $0` ROOTPATH"
+  exit 65
+fi
+
+ROOTPATH=$1
+BINPATH="$ROOTPATH/bin"
+drush=`$BINPATH/drupalindustry get-drush`
+if [ -z $drush ]; then
+    echo "Error getting drush."
+    exit 1
+fi
+
+${BINPATH}/drupalindustry clean-db
+${BINPATH}/drupalindustry clean-files

@@ -1,0 +1,125 @@
+#!/usr/bin/env bash
+
+# This script deletes the current installation and reinstalls it, so...
+# USE WITH CARE!
+#
+# This script is intended to be used in development/integration environment,
+# not production, i.e. reinstallation is not a best practice in production!
+
+# Handle arguments
+if [ $# -ne 1 ]
+then
+  echo "Usage: `basename $0` ROOTPATH"
+  exit 65
+fi
+
+ROOTPATH=$1
+BINPATH="$ROOTPATH/bin"
+drush=`$BINPATH/drupalindustry get-drush`
+if [ -z $drush ]; then
+    echo "Error getting drush."
+    exit 1
+fi
+
+profile="default"
+
+
+# User confirmation required: we are about to delete data!
+while true; do
+    read -p "WARNING! You are about to drop DB, content and files. You should have backed up your data BEFORE proceeding. Do you wish to continue? [y/n] " yn
+    case $yn in
+        [Yy]* ) break;;
+        [Nn]* ) echo "Aborted by user."
+                exit;;
+        * ) echo "Please answer Y (yes) or N (no).";;
+    esac
+done
+
+# Additional configuration
+server_user="www-data"
+sites_subdir="default"
+
+# Delete content
+echo "Cleaning files, reinitializing settings"
+while true; do
+    read -p "Would you like to keep existing settings (K) or remove/recreate (R) them? [k/r] " keep_settings
+    case $keep_settings in
+        [Kk]* ) keep_settings=1
+                break;;
+        [Rr]* ) keep_settings=0
+                break;;
+        * ) echo "Please answer K (keep) or R (remove/recreate).";;
+    esac
+done
+if [[ $keep_settings == 1 ]]
+then
+    bin/clean-all.sh
+else
+    bin/clean-db.sh
+    bin/clean-files.sh
+    sudo rm www/sites/$sites_subdir/settings.php
+    cp www/sites/$sites_subdir/default.settings.php www/sites/$sites_subdir/settings.php
+fi
+sudo rm -rf www/sites/default/files/*
+echo "Done"
+
+# Fixing permissions if necessary
+sudo chmod u+w www/sites/$sites_subdir
+
+# Make
+echo "Launching drush make"
+bin/make.sh
+# TODO: abort if drush make exited with errors
+echo "Done"
+
+# Ask the user wether to perform site install via shell (or let him do it via web)
+while true; do
+    read -p "Would you want to perform shell install with drush site-install? [y/n] " do_shell_install
+    case $do_shell_install in
+        [Yy]* ) do_shell_install=1
+                break;;
+        [Nn]* ) do_shell_install=0
+                break;;
+        * ) echo "Please answer Y (yes) or N (no).";;
+    esac
+done
+
+if [[ $do_shell_install == 0 ]]
+then
+    echo "Drush site-install refused by user. You may perform web install."
+else
+    # Get "drush site-install" configuration. See "drush help site-install".
+    db_url=`cat $ROOTPATH/etc/db.conf`  # Recommended way to go: not dropped by bin/clean.sh
+    if [[ $db_url ]]
+    then
+        echo "Got database configuration from $ROOTPATH/etc/db.conf"
+    else
+        echo "Couldn't read database configuration from $ROOTPATH/etc/db.conf"
+    fi
+    while [[ ! $db_url ]]
+    do
+        read -s -p "DB URL (mysql://user:password@localhost/database): " db_url
+        echo ""
+    done
+    db_prefix=""
+    read -p "Admin username: " account_name
+    read -s -p "Admin password: " account_pass
+    echo ""
+    read -p "Admin email address: " account_mail
+    locale="fr"
+    clean_url="1"
+    read -p "Site name: " site_name
+    site_mail=$account_mail
+
+    # Install
+    cd www
+    $drush site-install $profile --db-url=$db_url --db-prefix=$db_prefix --account-name=$account_name --account-pass=$account_pass --account-mail=$account_mail --locale=$locale --clean-url=$clean_url --site-name=$site_name --site-mail=$site_mail --sites-subdir=$sites_subdir
+    cd ..
+fi
+
+# Change permissions
+sudo chown $USER:$server_user www/sites/$sites_subdir/settings.php
+sudo chmod g+w www/sites/$sites_subdir/settings.php
+sudo chown -R $server_user:$server_user www/sites/$sites_subdir/files/
+sudo chown $USER:$server_user www/sites/$sites_subdir/files
+sudo chmod g+w www/sites/$sites_subdir/files

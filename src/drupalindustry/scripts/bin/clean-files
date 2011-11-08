@@ -1,0 +1,50 @@
+#!/bin/sh
+
+# Handle arguments
+if [ $# -ne 1 ]
+then
+  echo "Usage: `basename $0` ROOTPATH"
+  exit 65
+fi
+
+ROOTPATH=$1
+BINPATH="$ROOTPATH/bin"
+drush=`$BINPATH/drupalindustry get-drush`
+if [ -z $drush ]; then
+    echo "Error getting drush."
+    exit 1
+fi
+
+cd "${ROOTPATH}/www";
+# RM_EXCLUDE pattern : 'file1.ext\|file2.ext\|file3.ext'
+RM_EXCLUDE='backup';
+# Backup some files (move them to a safe place then restore them)
+mkdir backup
+if [ -e sites/all/themes/custom ]; then
+  mv sites/all/themes/custom backup/sites_all_themes_custom;
+fi;
+if [ -e sites/all/modules/custom ]; then
+  mv sites/all/modules/custom backup/sites_all_modules_custom;
+fi;
+# Delete files
+rm -rf\
+  `find . -maxdepth 1 -name "*.*" | grep -ve "^\(\.\|\.\.\|$RM_EXCLUDES\)$"`\
+  includes\
+  misc\
+  modules\
+  scripts\
+  sites/all\
+  themes\
+  profiles/minimal\
+  profiles/standard\
+  profiles/testing
+# Restore some dirs
+if [ -e backup/sites_all_themes_custom ]; then
+  mkdir -p sites/all/themes;
+  mv backup/sites_all_themes_custom sites/all/themes/custom;
+fi;
+if [ -e backup/sites_all_modules_custom ]; then
+  mkdir -p sites/all/modules;
+  mv backup/sites_all_modules_custom sites/all/modules/custom;
+fi;
+rmdir backup
