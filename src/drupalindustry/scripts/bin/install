@@ -1,0 +1,63 @@
+#!/bin/bash
+# Wrapper around "drush site-install".
+
+# Handle arguments
+if [ $# -ne 1 ]
+then
+  echo "Usage: `basename $0` ROOTPATH"
+  exit 65
+fi
+
+ROOTPATH=$1
+BINPATH="$ROOTPATH/bin"
+drush=`$BINPATH/drupalindustry get-drush`
+if [ -z $drush ]; then
+    echo "Error getting drush."
+    exit 1
+fi
+
+# Additional configuration
+project_user=$USER
+server_user="www-data"
+sites_subdir="default"
+db_prefix=""
+read -p "Drupal site admin username: " account_name
+read -s -p "Drupal site admin password: " account_pass
+echo ""
+read -p "Drupal site admin email address: " account_mail
+locale="fr"
+clean_url="1"
+site_name=$project_user
+site_mail=$account_mail
+profile="default"
+drupal_site_folder="www"
+
+# Fixing permissions if necessary
+# (potentially altered by a previous drush site-install)
+#sudo chmod u+w www/sites/$sites_subdir
+
+# Get "drush site-install" configuration. See "drush help site-install".
+db_url=`cat $ROOTPATH/etc/drupal/db.conf`  # Recommended way to go: not dropped by clean-files
+if [[ $db_url ]]
+then
+    echo "Got database configuration from $ROOTPATH/etc/db.conf"
+else
+    echo "Couldn't read database configuration from $ROOTPATH/etc/db.conf"
+fi
+while [[ ! $db_url ]]
+do
+    read -s -p "DB URL (mysql://user:password@localhost/database): " db_url
+    echo ""
+done
+
+# Install
+cd $drupal_site_folder
+$drush site-install $profile --db-url=$db_url --db-prefix=$db_prefix --account-name=$account_name --account-pass=$account_pass --account-mail=$account_mail --locale=$locale --clean-url=$clean_url --site-name=$site_name --site-mail=$site_mail --sites-subdir=$sites_subdir
+cd ..
+
+# Change permissions
+sudo chown $project_user:$server_user www/sites/$sites_subdir/settings.php
+sudo chmod g+w www/sites/$sites_subdir/settings.php
+sudo chown -R $server_user:$server_user www/sites/$sites_subdir/files/
+sudo chown $project_user:$server_user www/sites/$sites_subdir/files
+sudo chmod g+w www/sites/$sites_subdir/files

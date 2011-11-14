@@ -41,5 +41,9 @@ Where COMMAND is one of:
 * clean-db
 * clean-files
 * clean-settings
+* create-db
+* delete-db
+* get-drush
+* install
 * make
 * reinstall

@@ -1,4 +1,5 @@
 #!/bin/sh
+# Shortcut to execute clean-db, clean-files and clean-settings.
 
 # Handle arguments
 if [ $# -ne 1 ]
@@ -17,3 +18,4 @@ fi
 
 ${BINPATH}/drupalindustry clean-db
 ${BINPATH}/drupalindustry clean-files
+${BINPATH}/drupalindustry clean-settings

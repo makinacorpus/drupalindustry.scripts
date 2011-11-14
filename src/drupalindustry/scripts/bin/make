@@ -1,4 +1,5 @@
 #!/bin/sh
+# Wrapper around "drush make".
 
 # Handle arguments
 if [ $# -ne 1 ]

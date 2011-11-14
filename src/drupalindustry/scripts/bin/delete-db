@@ -1,0 +1,28 @@
+#!/bin/sh
+# Delete database and database's user.
+
+# User confirmation required: we are about to delete data!
+while true; do
+    read -p "WARNING! You are about to permanently delete database and database's user. You should have backed up your data BEFORE proceeding. Do you wish to continue? [y/n] " yn
+    case $yn in
+        [Yy]* ) break;;
+        [Nn]* ) echo "Aborted by user."
+                exit;;
+        * ) echo "Please answer Y (yes) or N (no).";;
+    esac
+done
+
+# Variables
+db_admin_user="root"
+read -s -p "Admin user's password: " db_admin_password
+db_type='mysql'
+db_host=localhost
+db_port=3306
+db_user=$USER
+db_name=$USER
+
+# Delete user and database
+echo "DELETE DATABASE"
+mysql -u $db_admin_user --password=$db_admin_password -e "DROP DATABASE '$db_name';";
+echo "DELETE USER"
+mysql -u $db_admin_user --password=$db_admin_password -e "DROP USER '$db_user'@'$db_host';";

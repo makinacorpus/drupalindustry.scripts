@@ -1,4 +1,5 @@
 #!/bin/sh
+# Wrapper around drush sql-drop.
 
 # Handle arguments
 if [ $# -ne 1 ]

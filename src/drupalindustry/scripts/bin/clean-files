@@ -1,4 +1,6 @@
 #!/bin/sh
+# Command to remove all Drupal files, excepted some customized locations,
+# i.e. remove all what can be rebuilt by drush make.
 
 # Handle arguments
 if [ $# -ne 1 ]

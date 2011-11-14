@@ -1,4 +1,5 @@
 #!/bin/sh
+# Remove then regenerate site settings file (www/sites/default/settings.php).
 
 # Handle arguments
 if [ $# -ne 1 ]

@@ -26,7 +26,7 @@ profile="default"
 
 # User confirmation required: we are about to delete data!
 while true; do
-    read -p "WARNING! You are about to drop DB, content and files. You should have backed up your data BEFORE proceeding. Do you wish to continue? [y/n] " yn
+    read -p "WARNING! You are about to drop DB tables, content and files. You should have backed up your data BEFORE proceeding. Do you wish to continue? [y/n] " yn
     case $yn in
         [Yy]* ) break;;
         [Nn]* ) echo "Aborted by user."
