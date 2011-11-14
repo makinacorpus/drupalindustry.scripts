@@ -20,16 +20,6 @@ setup(name='drupalindustry.scripts',
       include_package_data=True,
       zip_safe=False,
       install_requires=['setuptools', ],
-#      scripts=[
-#               'src/drupalindustry/scripts/bin/drupalindustry-clean-all',
-#               'src/drupalindustry/scripts/bin/drupalindustry-clean-db',
-#               'src/drupalindustry/scripts/bin/drupalindustry-clean-files',
-#               'src/drupalindustry/scripts/bin/drupalindustry-clean-settings',
-#               'src/drupalindustry/scripts/bin/drupalindustry-get-drush',
-#               'src/drupalindustry/scripts/bin/drupalindustry-get-paths',
-#               'src/drupalindustry/scripts/bin/drupalindustry-make',
-#               'src/drupalindustry/scripts/bin/drupalindustry-reinstall',
-#               ]
       entry_points=""" # -*- Entry points: -*-
       [console_scripts]
       drupalindustry = drupalindustry.scripts.commands:main
