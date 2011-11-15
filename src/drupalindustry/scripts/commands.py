@@ -38,7 +38,7 @@ class DrupalIndustryCommand(object):
         command_path = os.path.join(self.commands_dir, '%s' % self.command)
         if not os.path.exists(command_path):
             raise Exception("Unknown command %s" % self.command)
-        args = [command_path]
+        args = ['bash', command_path]
         args.append(self.project_dir)
         subprocess.call(args)
 

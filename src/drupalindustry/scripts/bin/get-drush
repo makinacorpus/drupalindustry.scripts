@@ -11,6 +11,10 @@ fi
 ROOTPATH=$1
 BINPATH="$ROOTPATH/bin"
 
+# Temporary shortcut!
+echo "$ROOTPATH/bin/drush"
+exit 0
+
 # Locate drush
 # Try local drush install
 drush="$BINPATH/drush"

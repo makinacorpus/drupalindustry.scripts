@@ -23,6 +23,6 @@ db_name=$USER
 
 # Delete user and database
 echo "DELETE DATABASE"
-mysql -u $db_admin_user --password=$db_admin_password -e "DROP DATABASE '$db_name';";
+mysql -u $db_admin_user --password=$db_admin_password -e "DROP DATABASE $db_name;";
 echo "DELETE USER"
 mysql -u $db_admin_user --password=$db_admin_password -e "DROP USER '$db_user'@'$db_host';";

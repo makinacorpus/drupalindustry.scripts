@@ -29,20 +29,21 @@ locale="fr"
 clean_url="1"
 site_name=$project_user
 site_mail=$account_mail
-profile="default"
+read -p "Drupal profile: " profile
 drupal_site_folder="www"
+db_conf_file=$ROOTPATH/etc/drupal/db.cfg
 
 # Fixing permissions if necessary
 # (potentially altered by a previous drush site-install)
 #sudo chmod u+w www/sites/$sites_subdir
 
 # Get "drush site-install" configuration. See "drush help site-install".
-db_url=`cat $ROOTPATH/etc/drupal/db.conf`  # Recommended way to go: not dropped by clean-files
+db_url=`cat $db_conf_file`  # Recommended way to go: not dropped by clean-files
 if [[ $db_url ]]
 then
-    echo "Got database configuration from $ROOTPATH/etc/db.conf"
+    echo "Got database configuration from $db_conf_file"
 else
-    echo "Couldn't read database configuration from $ROOTPATH/etc/db.conf"
+    echo "Couldn't read database configuration from $db_conf_file"
 fi
 while [[ ! $db_url ]]
 do
@@ -56,8 +57,8 @@ $drush site-install $profile --db-url=$db_url --db-prefix=$db_prefix --account-n
 cd ..
 
 # Change permissions
-sudo chown $project_user:$server_user www/sites/$sites_subdir/settings.php
-sudo chmod g+w www/sites/$sites_subdir/settings.php
-sudo chown -R $server_user:$server_user www/sites/$sites_subdir/files/
-sudo chown $project_user:$server_user www/sites/$sites_subdir/files
-sudo chmod g+w www/sites/$sites_subdir/files
+chown $project_user:$server_user www/sites/$sites_subdir/settings.php
+chmod g+w www/sites/$sites_subdir/settings.php
+chown -R $server_user:$server_user www/sites/$sites_subdir/files/
+chown $project_user:$server_user www/sites/$sites_subdir/files
+chmod g+w www/sites/$sites_subdir/files
